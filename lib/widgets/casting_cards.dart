@@ -1,49 +1,74 @@
-import 'dart:ffi';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:movies_app/models/models.dart';
+import 'package:movies_app/providers/movies_provider.dart';
+import 'package:provider/provider.dart';
 
 class CastingCards extends StatelessWidget {
-  const CastingCards({ Key? key }) : super(key: key);
+  final int movieId;
+
+  const CastingCards({Key? key, required this.movieId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 30),
-      width: double.infinity,
-      height: 180,      
-      child: ListView.builder(
-        itemCount: 10,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (_, int index) => const _CastCard()),
+    final moviesProvider = Provider.of<MoviesProvider>(context, listen: false);
+
+    return FutureBuilder(
+      future: moviesProvider.getMovieCast(movieId),
+      builder: (context, AsyncSnapshot<List<Cast>> snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+              constraints: const BoxConstraints(maxWidth: 50),
+              height: 180,
+              child: const CupertinoActivityIndicator());
+        }
+
+        final cast = snapshot.data!;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 30),
+          width: double.infinity,
+          height: 180,
+          child: ListView.builder(
+              itemCount: cast.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (_, int index) {
+                if (cast.isNotEmpty) return _CastCard(actor: cast[index]);
+                return Container();
+              }),
+        );
+      },
     );
   }
 }
 
 class _CastCard extends StatelessWidget {
-  const _CastCard({Key? key}) : super(key: key);
+  final Cast actor;
+
+  const _CastCard({Key? key, required this.actor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       width: 110,
-      height: 100,      
+      height: 100,
       child: Column(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: FadeInImage(
-              placeholder: AssetImage('assets/loading.gif'), 
-              image: NetworkImage('https://via.placeholder.com/150x300'),
+              placeholder: const AssetImage('assets/loading.gif'),
+              image: NetworkImage(actor.fullProfilePath),
               height: 140,
               width: 100,
               fit: BoxFit.cover,
-              ),
+            ),
           ),
-          SizedBox(height: 5,),
+          const SizedBox(
+            height: 5,
+          ),
           Text(
-            'actor.name',
+            actor.name,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
             textAlign: TextAlign.center,

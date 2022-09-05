@@ -37,7 +37,7 @@ class _MovieSliderState extends State<MovieSlider> {
     }
     return SizedBox(
       width: double.infinity,
-      height: 260,
+      height: 300,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,22 +70,26 @@ class _MoviePoster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    movie.heroId = 'slider-${movie.id}';
+
     return Container(
       width: 130,
-      height: 190,
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(children: [
         GestureDetector(
           onTap: () =>
               Navigator.pushNamed(context, 'details', arguments: movie),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: FadeInImage(
-              placeholder: const AssetImage('assets/loading.gif'),
-              image: NetworkImage(movie.fullPosterImg),
-              width: 130,
-              height: 190,
-              fit: BoxFit.cover,
+          child: Hero(
+            tag: movie.heroId!,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: FadeInImage(
+                placeholder: const AssetImage('assets/loading.gif'),
+                image: NetworkImage(movie.fullPosterImg),
+                width: 130,
+                height: 190,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
